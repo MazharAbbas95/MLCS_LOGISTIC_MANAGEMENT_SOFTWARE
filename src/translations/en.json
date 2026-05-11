@@ -1,0 +1,153 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "vehicleRecord": "Vehicle Record",
+    "dailyExpense": "Company Daily Expense",
+    "digitalBilty": "Digital Bilty",
+    "letterPad": "Letter Pad",
+    "reports": "Reports",
+    "settings": "Settings",
+    "comingSoon": "Coming Soon",
+    "language": "Language",
+    "english": "English",
+    "urdu": "اردو",
+    "welcome": "Welcome back",
+    "overview": "Company Overview",
+    "date": "Date",
+    "expensePage": {
+      "title": "Company Daily Expenses",
+      "addTitle": "Add Daily Expense",
+      "viewTitle": "View Daily Expenses",
+      "description": "Log and track your company's operational daily expenditures.",
+      "month": "Month",
+      "fields": {
+        "date": "Date",
+        "description": "Tafseel Kharcha (Details)",
+        "amount": "Amount / Cost"
+      },
+      "buttons": {
+        "save": "Save Expenses",
+        "back": "Go Back"
+      }
+    },
+    "letterPadPage": {
+      "title": "Letter Pad",
+      "description": "Create professional applications and official documents on company letterhead.",
+      "placeholder": "Start typing your application here...",
+      "buttons": {
+        "print": "Print Document",
+        "save": "Save as Draft",
+        "back": "Go Back"
+      }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "empty": "No new notifications",
+      "clearAll": "Clear All",
+      "types": {
+        "success": "Success",
+        "info": "Information",
+        "warning": "Warning"
+      },
+      "messages": {
+        "vehicleAdded": "Vehicle record has been successfully added to the ledger.",
+        "expenseAdded": "Daily expenses for the month have been saved.",
+        "letterSaved": "Letter has been saved to your drafts.",
+        "biltyGenerated": "Digital Bilty has been generated and is ready for print.",
+        "monthlyReport": "Monthly financial report for {period} is now available.",
+        "yearlyReport": "Yearly financial performance report for {period} has been generated."
+      }
+    },
+    "biltyPage": {
+      "title": "Digital Bilty",
+      "description": "Generate and manage digital goods forwarding notes (Bilty) with official branding.",
+      "header": "Madad Logistics Container Services",
+      "fields": {
+        "biltyNo": "Bilty No",
+        "date": "Date",
+        "truckNo": "Truck No",
+        "driverNo": "Driver Mobile",
+        "cnic": "CNIC Number",
+        "from": "From (Origin)",
+        "to": "To (Destination)",
+        "sender": "Consignor / Sender",
+        "receiver": "Consignee / Receiver",
+        "quantity": "Quantity",
+        "description": "Description of Goods",
+        "totalFare": "Total Fare",
+        "advance": "Advance",
+        "balance": "Balance",
+        "containerNo": "Container Number",
+        "shippingLine": "Shipping Line"
+      },
+      "buttons": {
+        "generate": "Generate Bilty",
+        "print": "Print Bilty",
+        "back": "Go Back"
+      }
+    },
+    "reportsPage": {
+      "title": "Financial Reports",
+      "description": "Comprehensive analysis of company revenue, operational expenses, and profit margins.",
+      "monthly": "Monthly Report",
+      "yearly": "Yearly Report",
+      "summary": "Financial Summary",
+      "revenue": "Total Revenue",
+      "expenses": "Total Expenses",
+      "netProfit": "Net Profit",
+      "netLoss": "Net Loss",
+      "status": "Financial Status",
+      "profit": "Profit",
+      "loss": "Loss",
+      "period": "Analysis Period",
+      "currentMonth": "Current Month Report",
+      "previousMonth": "Previous Month Report",
+      "endOfMonthNotice": "This month's final report will be generated on the last day of the month.",
+      "buttons": {
+        "view": "View Details",
+        "print": "Print Report",
+        "back": "Go Back"
+      }
+    },
+    "stats": {
+      "totalVehicles": "Total Vehicles",
+      "activeTrips": "Active Trips",
+      "totalExpenses": "Total Expenses",
+      "pendingPayments": "Pending Payments"
+    },
+    "vehiclePage": {
+      "title": "Vehicle Records",
+      "description": "Manage and track all vehicle information, maintenance logs, and registration details.",
+      "addVehicle": "Add Vehicle Record",
+      "viewVehicles": "View Vehicle Records",
+      "addExpense": "Add Expense",
+      "viewExpenses": "View Expenses",
+      "form": {
+        "title": "Add Vehicle Record",
+        "description": "Enter the details below in excel format to register a new vehicle record.",
+        "excelHeader": "Madad Logistics Container Services",
+        "fields": {
+          "srNo": "Sr No",
+          "biltyNumber": "Bilty Number",
+          "vehicleNumber": "Vehicle Number",
+          "driverMobile": "Driver Mobile Number",
+          "partyKariya": "Party Kariya",
+          "mlcsKariya": "MLCS Kariya",
+          "vehicleKariya": "Vehicle Kariya",
+          "commision": "Commision",
+          "commisionStatus": "Commision Status",
+          "tafseelMaal": "Tafseel Maal",
+          "loadingStation": "Loading Station",
+          "unloadingStation": "Unloading Station",
+          "partyMillName": "Party/Mill Name",
+          "broker": "Broker",
+          "tafseelAkhrajat": "Tafseel Akhrajat"
+        },
+        "buttons": {
+          "save": "Save Record",
+          "back": "Go Back"
+        }
+      }
+    }
+  }
+}

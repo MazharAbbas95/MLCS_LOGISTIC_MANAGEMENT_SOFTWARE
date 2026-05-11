@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+@theme {
+  --color-natural-bg: var(--color-natural-bg, #F5F5F0);
+  --color-natural-text: var(--color-natural-text, #2D332D);
+  --color-sage-dark: var(--accent-dark, #3D473D);
+  --color-sage-medium: var(--accent-primary, #88887A);
+  --color-sage-light: var(--accent-light, #A3B18A);
+  --color-sage-border: var(--color-sage-border, #E0E0D6);
+  
+  /* Legacy/Direct Accents if needed */
+  --color-accent-primary: var(--accent-primary, #88887A);
+  --color-accent-dark: var(--accent-dark, #3D473D);
+  --color-accent-light: var(--accent-light, #A3B18A);
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Playfair Display', 'Noto Serif Arabic', serif;
+  --font-urdu: 'Noto Sans Arabic', 'Tahoma', 'Segoe UI', serif;
+}
+
+@layer base {
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Noto+Sans+Arabic:wght@300;400;500;600;700&family=Noto+Serif+Arabic:wght@400;700&display=swap');
+
+  body {
+    @apply antialiased text-natural-text bg-natural-bg;
+  }
+
+  [dir="rtl"] {
+    @apply text-right;
+  }
+}
+
+@layer components {
+  .font-urdu-title {
+    @apply font-urdu leading-snug;
+  }
+
+  .font-urdu-body {
+    @apply font-urdu leading-relaxed;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-natural-bg;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-sage-medium/30 rounded-full hover:bg-sage-medium;
+  }
+}
+
+@layer utilities {
+  @media print {
+    .print\:hidden {
+      display: none !important;
+    }
+    
+    body {
+      background: white !important;
+      padding: 2cm !important;
+      margin: 0 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    .bg-white {
+      background: white !important;
+    }
+
+    .bg-natural-bg\/80, .bg-natural-bg\/50, .bg-natural-bg\/30 {
+      background: #f9f9f9 !important;
+    }
+
+    .border-x, .border-b, .border-t, .border {
+      border: 1px solid #ddd !important;
+    }
+
+    .sticky {
+      position: static !important;
+    }
+
+    /* Ensure table is visible and not cut off */
+    .overflow-x-auto {
+      overflow: visible !important;
+    }
+    
+    table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+      table-layout: auto !important;
+    }
+    
+    th, td {
+      border: 1px solid #ddd !important;
+      font-size: 6pt !important;
+      padding: 3px !important;
+      white-space: normal !important;
+      word-break: break-word !important;
+      min-width: auto !important;
+      vertical-align: top !important;
+    }
+
+    /* Column specific widths for print to fit A4 */
+    th:nth-child(1), td:nth-child(1) { width: 4% !important; min-width: 4% !important; }
+    th:nth-child(2), td:nth-child(2) { width: 8% !important; min-width: 8% !important; }
+    th:nth-child(3), td:nth-child(3) { width: 10% !important; min-width: 10% !important; }
+
+    th {
+      background-color: #f3f4f6 !important;
+      color: black !important;
+      font-weight: bold !important;
+      text-transform: uppercase !important;
+    }
+
+    .bg-sage-dark {
+      background-color: #3D473D !important;
+      color: white !important;
+      -webkit-print-color-adjust: exact !important;
+    }
+
+    .text-emerald-600 {
+      color: #059669 !important;
+    }
+
+    .text-red-500 {
+      color: #ef4444 !important;
+    }
+  }
+}
+
+/* Global settings overrides */
+.no-animations *, 
+.no-animations *::before, 
+.no-animations *::after {
+  animation-duration: 0ms !important;
+  transition-duration: 0ms !important;
+}
+
+.compact-mode {
+  --spacing-multiplier: 0.7;
+}
+
+/* Base transitions */
+* {
+  transition: background-color var(--transition-speed, 200ms) ease, 
+              border-color var(--transition-speed, 200ms) ease, 
+              color var(--transition-speed, 200ms) ease;
+}
+

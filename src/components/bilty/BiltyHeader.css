@@ -1,0 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap');
+
+.bilty-header-container {
+  width: 100%;
+  position: relative;
+  background: white;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+  user-select: none;
+  min-height: 180px;
+}
+
+.urdu-text {
+  font-family: 'Noto Nastaliq Urdu', serif;
+  direction: rtl;
+}
+
+/* Curved Background Decor Reconstruction */
+.header-bg-curves {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.curve-shape {
+  position: absolute;
+  top: -15px;
+  background: #4caf50; /* Base green */
+  border-radius: 50%;
+  opacity: 0.3;
+}
+
+.curve-1 {
+  left: -10%;
+  width: 50%;
+  height: 100px;
+  rotate: -10deg;
+  background: #81c784;
+}
+
+.curve-2 {
+  right: -10%;
+  width: 50%;
+  height: 100px;
+  rotate: 10deg;
+  background: #66bb6a;
+}
+
+.curve-center {
+  left: 0;
+  width: 100%;
+  height: 60px;
+  top: -30px;
+  background: #388e3c;
+  opacity: 0.2;
+}
+
+/* Oval Badges */
+.office-badge {
+  background: #e91e63; /* Pink */
+  color: white;
+  padding: 1px 12px;
+  border-radius: 50px;
+  font-size: 8px;
+  font-weight: 900;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+}
+
+.proprietor-badge {
+  background: #1a237e; /* Blue */
+  color: white;
+  padding: 1px 10px;
+  border-radius: 50px;
+  font-size: 8px;
+  font-weight: 900;
+  rotate: -10deg;
+  white-space: nowrap;
+}
+
+/* Address Boxes */
+.location-box {
+  background: #283593; /* Indigo/Blue */
+  color: white;
+  padding: 0px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  box-shadow: 3px 0 5px rgba(0,0,0,0.2);
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.ntn-text {
+  color: #e91e63; /* Pink */
+  font-weight: 900;
+  font-size: 13px;
+}
+
+/* Main Layout Positioning */
+.branding-english {
+  color: #d32f2f; /* Red */
+  font-weight: 900;
+  font-size: 28px;
+  text-shadow: 1px 1px 0px rgba(255,255,255,1);
+  line-height: 1;
+}
+
+.branding-urdu-main {
+  font-size: 38px;
+  font-weight: 900;
+  line-height: 0.9;
+  letter-spacing: -1px;
+}
+
+.urdu-red { color: #d32f2f; }
+.urdu-blue { color: #1a237e; }
+
+.sub-title-services {
+  color: #1a237e;
+  font-weight: 900;
+  font-size: 18px;
+  margin-top: -8px;
+  letter-spacing: 2px;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+  
+  body {
+    background: white !important;
+  }
+
+  .bilty-header-container {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
