@@ -1,9 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { BiltyService } from '../services/bilty.service';
 import { biltySchema } from '../validations/bilty.validation';
-import { generateBiltyPdf } from '../services/generateBiltyPdf';
 import { addPdfToQueue } from '../services/queue.service';
-import fs from 'fs';
 
 export class BiltyController {
   static async create(req: Request, res: Response, next: NextFunction) {
@@ -34,26 +32,6 @@ export class BiltyController {
     } catch (error) { next(error); }
   }
 
-  static async downloadPdf(req: Request, res: Response, next: NextFunction) {
-    const log = (msg: string) => {
-      const timestamp = new Date().toISOString();
-      fs.appendFileSync('debug.log', `[${timestamp}] ${msg}\n`);
-    };
-
-    log(`PDF Download Request Received for Bilty: ${req.body.biltyNo}`);
-    try {
-      const pdf = await generateBiltyPdf(req.body);
-      log('PDF generated successfully, size: ' + pdf.length);
-      
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename=bilty-${req.body.biltyNo || 'document'}.pdf`);
-      res.send(pdf);
-    } catch (error: any) {
-      log(`Controller PDF Error: ${error.message}`);
-      next(error);
-    }
-  }
-
   static async queueBatchPdf(req: Request, res: Response, next: NextFunction) {
     try {
       const { items } = req.body;
@@ -62,13 +40,12 @@ export class BiltyController {
       }
 
       const jobs = await Promise.all(items.map(item => addPdfToQueue(item)));
-      
-      res.json({ 
-        success: true, 
+
+      res.json({
+        success: true,
         message: `${items.length} PDF jobs queued for background processing`,
         jobIds: jobs.map(j => j.id)
       });
     } catch (error) { next(error); }
   }
 }
-

@@ -5,13 +5,17 @@ import fs from 'fs';
 import path from 'path';
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
-let connection: IORedis | undefined;
 let pdfQueue: any;
 let redisAvailable = false;
+
+// BullMQ bundles its own ioredis version — pass the URL string directly
+// to avoid type conflicts between the two ioredis copies.
+const bullConnection = { url: REDIS_URL };
 
 // Only attempt Redis connection once at startup. If it fails, disable gracefully.
 async function initRedis() {
   try {
+    // First verify Redis is reachable using standalone ioredis
     const redis = new IORedis(REDIS_URL, {
       maxRetriesPerRequest: null,
       lazyConnect: true,
@@ -28,9 +32,11 @@ async function initRedis() {
       new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000)),
     ]);
 
-    connection = redis;
+    redis.disconnect(); // We don't need this instance anymore
     redisAvailable = true;
-    pdfQueue = new Queue('pdf-generation', { connection });
+
+    // Use URL string for BullMQ to avoid ioredis version type conflicts
+    pdfQueue = new Queue('pdf-generation', { connection: bullConnection as any });
     console.log('[Queue] Redis connected. Batch PDF features enabled.');
 
     // Start the worker
@@ -53,7 +59,7 @@ async function initRedis() {
         return { success: true };
       },
       {
-        connection,
+        connection: bullConnection as any,
         concurrency: 2,
       }
     );
@@ -67,7 +73,6 @@ async function initRedis() {
     });
   } catch {
     console.warn('[Queue] Redis unavailable — Batch PDF features disabled. App will run normally without it.');
-    connection = undefined;
     redisAvailable = false;
   }
 }

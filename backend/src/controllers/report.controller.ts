@@ -7,11 +7,11 @@ export class ReportController {
       const reports = await prisma.report.findMany({
         orderBy: { createdAt: 'desc' }
       });
-      const formattedReports = reports.map(r => ({
+      const data = reports.map(r => ({
         ...r,
         details: r.details ? JSON.parse(r.details) : null
       }));
-      res.json(formattedReports);
+      res.json({ success: true, data });
     } catch (error) {
       next(error);
     }
@@ -30,7 +30,7 @@ export class ReportController {
           details: JSON.stringify(details)
         }
       });
-      res.status(201).json({ id: report.id });
+      res.status(201).json({ success: true, data: report });
     } catch (error) {
       next(error);
     }

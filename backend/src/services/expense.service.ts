@@ -11,9 +11,8 @@ export class ExpenseService {
 
     if (search) {
       where.OR = [
-        { category: { contains: search } },
         { description: { contains: search } },
-        { paidTo: { contains: search } }
+        { expenseMonth: { contains: search } },
       ];
     }
 

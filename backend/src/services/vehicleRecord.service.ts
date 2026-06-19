@@ -15,10 +15,12 @@ export class VehicleRecordService {
     if (search) {
       where.OR = [
         { truckNo: { contains: search } },
-        { driverName: { contains: search } },
-        { driverPhone: { contains: search } },
-        { origin: { contains: search } },
-        { destination: { contains: search } }
+        { biltyNo: { contains: search } },
+        { driverNo: { contains: search } },
+        { loadingStation: { contains: search } },
+        { unloadingStation: { contains: search } },
+        { partyMillName: { contains: search } },
+        { broker: { contains: search } },
       ];
     }
 
@@ -35,6 +37,53 @@ export class VehicleRecordService {
     const nextCursor = hasNextPage ? items[items.length - 1].id : null;
 
     return { data: items, nextCursor };
+  }
+
+  static async getStats() {
+    const now = new Date();
+    // Start and end of current month
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    // Start and end of today
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+    const baseWhere = { deletedAt: null };
+    const monthWhere = { ...baseWhere, createdAt: { gte: monthStart, lte: monthEnd } };
+    const todayWhere = { ...baseWhere, createdAt: { gte: todayStart, lte: todayEnd } };
+
+    // Run all queries in parallel
+    const [
+      totalMonthlyVehicles,
+      todayVehicles,
+      monthlyRevenueAgg,
+      monthlyCommissionAgg,
+      pendingCommissionAgg,
+      recentVehicles,
+    ] = await Promise.all([
+      prisma.vehicleRecord.count({ where: monthWhere }),
+      prisma.vehicleRecord.count({ where: todayWhere }),
+      prisma.vehicleRecord.aggregate({ where: monthWhere, _sum: { partyKariya: true } }),
+      prisma.vehicleRecord.aggregate({ where: monthWhere, _sum: { commission: true } }),
+      prisma.vehicleRecord.aggregate({
+        where: { ...monthWhere, commissionStatus: { not: 'Paid' } },
+        _sum: { commission: true }
+      }),
+      prisma.vehicleRecord.findMany({
+        where: baseWhere,
+        orderBy: { id: 'desc' },
+        take: 5,
+      }),
+    ]);
+
+    return {
+      totalMonthlyVehicles,
+      todayVehicles,
+      totalMonthlyRevenue: monthlyRevenueAgg._sum.partyKariya ?? 0,
+      totalCommission: monthlyCommissionAgg._sum.commission ?? 0,
+      pendingPayments: pendingCommissionAgg._sum.commission ?? 0,
+      recentVehicles,
+    };
   }
 
   static async getById(id: number) {

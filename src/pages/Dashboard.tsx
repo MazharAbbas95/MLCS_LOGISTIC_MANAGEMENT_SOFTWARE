@@ -83,56 +83,38 @@ const Dashboard: React.FC<DashboardProps> = ({ onAction }) => {
   const fetchDashboardData = async (isBackground = false) => {
     try {
       if (!isBackground) setLoading(true);
-      const vehiclesResponse = await vehicleApi.getAll();
-      const expensesResponse = await expenseApi.getAll();
 
-      const vehicles = Array.isArray(vehiclesResponse.data) ? vehiclesResponse.data : [];
-      const expenses = Array.isArray(expensesResponse.data) ? expensesResponse.data : [];
+      // Single server-side call — aggregates across ALL records in the DB
+      const stats = await vehicleApi.getStats();
 
-      const now = new Date();
-      const currentMonth = now.getMonth();
-      const currentYear = now.getFullYear();
-      const todayStr = now.toISOString().split('T')[0];
-
-      setRecentVehicles(vehicles.slice(0, 5));
-
-      // Total Vehicles (This Month)
-      const monthlyVehicles = vehicles.filter((v: any) => {
-        const d = new Date(v.date || v.createdAt);
-        return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-      });
-
-      // Today's Vehicles
-      const todayVehiclesList = vehicles.filter((v: any) => {
-        const d = (v.date || v.createdAt).split('T')[0];
-        return d === todayStr;
-      });
-
-      // Monthly Expenses
-      const monthlyExpensesTotal = expenses.filter((e: any) => {
-        const d = new Date(e.date || e.createdAt);
-        return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-      }).reduce((sum: number, e: any) => sum + (parseFloat(e.amount) || 0), 0);
-
-      // Pending Payments
-      const pendingTotal = monthlyVehicles
-        .filter((v: any) => v.commissionStatus !== 'Paid')
-        .reduce((sum: number, v: any) => sum + (parseFloat(v.commission) || 0), 0);
-
-      // Monthly Revenue (sum of partyKariya)
-      const monthlyRevenue = monthlyVehicles.reduce((sum: number, v: any) => sum + (parseFloat(v.partyKariya) || 0), 0);
-
-      // Total Commission (sum of all commission this month)
-      const monthlyCommission = monthlyVehicles.reduce((sum: number, v: any) => sum + (parseFloat(v.commission) || 0), 0);
-
+      setRecentVehicles(stats.recentVehicles ?? []);
       setMetrics({
-        totalMonthlyVehicles: monthlyVehicles.length,
-        todayVehicles: todayVehiclesList.length,
-        totalMonthlyExpenses: monthlyExpensesTotal,
-        pendingPayments: pendingTotal,
-        totalMonthlyRevenue: monthlyRevenue,
-        totalCommission: monthlyCommission
+        totalMonthlyVehicles: stats.totalMonthlyVehicles ?? 0,
+        todayVehicles: stats.todayVehicles ?? 0,
+        totalMonthlyExpenses: 0, // fetched separately below
+        pendingPayments: stats.pendingPayments ?? 0,
+        totalMonthlyRevenue: stats.totalMonthlyRevenue ?? 0,
+        totalCommission: stats.totalCommission ?? 0,
       });
+
+      // Fetch monthly expenses total from expenses API
+      try {
+        const expensesResponse = await expenseApi.getAll();
+        const expenses = Array.isArray(expensesResponse.data) ? expensesResponse.data : [];
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        const monthlyExpensesTotal = expenses
+          .filter((e: any) => {
+            const d = new Date(e.date || e.createdAt);
+            return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+          })
+          .reduce((sum: number, e: any) => sum + (parseFloat(e.amount) || 0), 0);
+
+        setMetrics(prev => ({ ...prev, totalMonthlyExpenses: monthlyExpensesTotal }));
+      } catch {
+        // expenses not critical, keep 0
+      }
     } catch (error: any) {
       console.error('Dashboard Data Fetch Error Details:', {
         message: error.message,

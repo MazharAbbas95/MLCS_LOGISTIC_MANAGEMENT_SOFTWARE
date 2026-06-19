@@ -223,14 +223,22 @@ const DigitalBilty: React.FC<DigitalBiltyProps> = ({ onBack, onArchiveClick }) =
     if (loading) return;
     try {
       setLoading(true);
-      await biltyApi.create(formData);
+      // Normalize array fields to strings before sending to API
+      const payload = {
+        ...formData,
+        cnic: Array.isArray(formData.cnic) ? formData.cnic.join('') : formData.cnic,
+        containerNo: Array.isArray(formData.containerNo) ? formData.containerNo.join('') : formData.containerNo,
+        financialNotes: undefined, // not in schema — remove from payload
+      };
+      // Remove undefined keys
+      Object.keys(payload).forEach(k => (payload as any)[k] === undefined && delete (payload as any)[k]);
+      await biltyApi.create(payload);
       addNotification('success', t('common.notifications.messages.biltyGenerated'));
       onBack();
     } catch (error: any) {
       console.error('Bilty Save Error:', error);
       let errorMessage = 'Validation failed. Please fill all required fields correctly.';
-      
-      // Attempt to extract specific Zod error messages
+
       if (error.errors && Array.isArray(error.errors) && error.errors.length > 0) {
         const firstError = error.errors[0];
         const fieldName = firstError.path ? firstError.path[firstError.path.length - 1] : 'Field';
@@ -238,7 +246,7 @@ const DigitalBilty: React.FC<DigitalBiltyProps> = ({ onBack, onArchiveClick }) =
       } else if (error.message && error.message !== 'Validation failed') {
         errorMessage = error.message;
       }
-      
+
       addNotification('error', errorMessage);
     } finally {
       setLoading(false);

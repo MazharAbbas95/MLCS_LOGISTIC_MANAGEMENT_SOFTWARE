@@ -2,11 +2,19 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 
+// Capture NODE_ENV BEFORE dotenv can override it (important for production start)
+const presetNodeEnv = process.env.NODE_ENV;
+
 // Load .env first as base config
 dotenv.config();
 // Then load .env.local with override to allow local overrides
 if (fs.existsSync('.env.local')) {
   dotenv.config({ path: '.env.local', override: true });
+}
+
+// Restore NODE_ENV if it was pre-set (e.g. by cross-env in npm run start)
+if (presetNodeEnv) {
+  process.env.NODE_ENV = presetNodeEnv;
 }
 
 import express from 'express';
@@ -26,6 +34,9 @@ import helmet from 'helmet';
 import compression from 'compression';
 import { rateLimit } from 'express-rate-limit';
 import logger from './backend/src/utils/logger';
+import './backend/src/services/queue.service'; // Initialize Redis worker on startup
+import './backend/src/services/backup.service'; // Auto-backup database every 24h
+import { ipWhitelistMiddleware } from './backend/src/middleware/ipWhitelist';
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -41,7 +52,7 @@ const __dirname = path.dirname(__filename);
 async function startServer() {
   console.log('[Server] Initializing...');
   const app = express();
-  const PORT = process.env.PORT || 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(helmet({
     contentSecurityPolicy: false, // Disabled for Vite dev mode compatibility
@@ -49,6 +60,14 @@ async function startServer() {
   app.use(compression());
   app.use(cors());
   app.use(express.json());
+
+  // Trust proxy headers (needed to get real client IP behind nginx/reverse proxy)
+  app.set('trust proxy', true);
+
+  // ── IP WHITELIST: Block all non-LAN access ──────────────────────────────────
+  // Only allows requests from 192.168.x.x, 10.x.x.x, 172.16.x.x, localhost
+  // Add extra IPs via ALLOWED_IPS env var (comma separated)
+  app.use(ipWhitelistMiddleware);
 
   // Use pino for logging
   app.use((req, res, next) => {

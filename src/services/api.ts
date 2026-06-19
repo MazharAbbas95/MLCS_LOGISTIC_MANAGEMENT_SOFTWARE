@@ -41,6 +41,8 @@ api.interceptors.response.use(
 );
 
 export const vehicleApi = {
+  getStats: () =>
+    api.get('/vehicle-records/stats').then(res => res.data.data),
   getAll: (cursor?: number, limit?: number) => 
     api.get('/vehicle-records', { params: { cursor, limit } }).then(res => res.data),
   getById: (id: number) => api.get(`/vehicle-records/${id}`).then(res => res.data.data),
@@ -68,6 +70,18 @@ export const letterpadApi = {
     api.get('/letterpads', { params: { cursor, limit } }).then(res => res.data),
   create: (data: any) => api.post('/letterpads', data).then(res => res.data.data),
   delete: (id: number) => api.delete(`/letterpads/${id}`).then(res => res.data),
+};
+
+export const reportApi = {
+  getAll: () => api.get('/reports').then(res => res.data.data as any[]),
+  create: (data: {
+    period: string;
+    revenue: number;
+    expenses: number;
+    net: number;
+    type: string;
+    details: any;
+  }) => api.post('/reports', data).then(res => res.data),
 };
 
 export default api;

@@ -1,8 +1,27 @@
-node_modules/
+node_modules
+dist
+.env
+.env.local
+
+# Debug and log files
+debug.log
+*.log
+
+# SQLite database files — contain real data, never commit!
+database.sqlite
+prisma/dev.db
+prisma/*.db
+
+# Auto-generated backups (stored locally, do NOT commit to git)
+backups/
+
+# Scratch/test scripts
+scratch/
+
+# Build artifacts
+dist/
 build/
 dist/
 coverage/
 .DS_Store
-*.log
-.env*
 !.env.example

@@ -22,6 +22,15 @@ export class VehicleRecordController {
     }
   }
 
+  static async getStats(req: Request, res: Response, next: NextFunction) {
+    try {
+      const stats = await VehicleRecordService.getStats();
+      res.json({ success: true, data: stats });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async getAll(req: Request, res: Response, next: NextFunction) {
     try {
       const { cursor, limit, search } = req.query;
@@ -70,3 +79,4 @@ export class VehicleRecordController {
     }
   }
 }
+

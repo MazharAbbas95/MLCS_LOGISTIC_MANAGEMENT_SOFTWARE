@@ -21,6 +21,17 @@
       ]
     },
     "allowImportingTsExtensions": true,
-    "noEmit": true
+    "noEmit": true,
+    "types": [
+      "node",
+      "vite/client",
+      "bcryptjs",
+      "cors",
+      "dompurify",
+      "express",
+      "jsdom",
+      "jsonwebtoken",
+      "react-window"
+    ]
   }
 }

@@ -16,6 +16,7 @@ import {
 import { motion } from 'motion/react';
 import { useLanguage } from '../context/LanguageContext';
 import { useNotifications } from '../context/NotificationContext';
+import { vehicleApi, expenseApi, reportApi } from '../services/api';
 
 interface ReportsProps {
   onBack: () => void;
@@ -49,13 +50,11 @@ const Reports: React.FC<ReportsProps> = ({ onBack }) => {
   const fetchArchives = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/reports');
-      if (response.ok) {
-        const data = await response.json();
-        setArchivedReports(data);
-      }
+      const data = await reportApi.getAll();
+      setArchivedReports(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Archive Fetch Error:', error);
+      addNotification('error', 'Failed to load archived reports.');
     } finally {
       setLoading(false);
     }
@@ -64,61 +63,44 @@ const Reports: React.FC<ReportsProps> = ({ onBack }) => {
   const fetchRealData = async () => {
     try {
       setLoading(true);
-      const [vRes, eRes] = await Promise.all([
-        fetch('/api/vehicle-records'),
-        fetch('/api/expenses')
-      ]);
 
-      if (vRes.ok && eRes.ok) {
-        const vData = await vRes.json();
-        const vehicles = Array.isArray(vData.data) ? vData.data : [];
-        const eData = await eRes.json();
-        const expenses = Array.isArray(eData.data) ? eData.data : [];
+      // Use server-side stats (all records, not paginated 20)
+      const stats = await vehicleApi.getStats();
 
-        // Calculate based on current selection
-        const now = new Date();
-        const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-        const currentYear = now.getFullYear().toString();
+      // Fetch expenses for the period
+      const expensesResponse = await expenseApi.getAll();
+      const expenses = Array.isArray(expensesResponse.data) ? expensesResponse.data : [];
 
-        const filterPeriod = activeTab === 'monthly' ? currentMonth : currentYear;
-        
-        // Filter vehicles
-        const filteredVehicles = vehicles.filter((v: any) => {
-          const date = v.createdAt ? v.createdAt.substring(0, activeTab === 'monthly' ? 7 : 4) : '';
-          return date === filterPeriod;
-        });
+      const now = new Date();
+      const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const currentYear = now.getFullYear().toString();
 
-        // Filter expenses
-        const filteredExpenses = expenses.filter((e: any) => {
-          const date = e.date ? e.date.substring(0, activeTab === 'monthly' ? 7 : 4) : '';
-          return date === filterPeriod;
-        });
+      const filteredExpenses = expenses.filter((e: any) => {
+        const date = e.date ? e.date.substring(0, activeTab === 'monthly' ? 7 : 4) : '';
+        return date === (activeTab === 'monthly' ? currentMonth : currentYear);
+      });
 
-        const revenue = filteredVehicles.reduce((sum: number, v: any) => {
-          return sum + (v.partyKariya || 0);
-        }, 0);
+      const operationalExpenses = filteredExpenses.reduce(
+        (sum: number, e: any) => sum + (parseFloat(e.amount) || 0), 0
+      );
 
-        const vehicleCosts = filteredVehicles.reduce((sum: number, v: any) => {
-          return sum + (v.vehicleKariya || 0);
-        }, 0);
+      // Use server-side monthly revenue & vehicle costs from stats
+      const revenue = activeTab === 'monthly' ? (stats.totalMonthlyRevenue ?? 0) : 0;
+      const vehicleCosts = activeTab === 'monthly' ? (stats.totalCommission ?? 0) : 0;
+      const totalExpenses = vehicleCosts + operationalExpenses;
 
-        const opertaionExpenses = filteredExpenses.reduce((sum: number, e: any) => {
-          return sum + (parseFloat(e.amount) || 0);
-        }, 0);
-
-        const totalExpenses = vehicleCosts + opertaionExpenses;
-
-        setCalculatedData({
-          period: activeTab === 'monthly' ? `Current: ${new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}` : `Current Year: ${currentYear}`,
-          revenue,
-          expenses: totalExpenses,
-          breakdown: [
-            { category: "Logistics Revenue", amount: revenue, type: 'income' },
-            { category: "Transporter Payments", amount: vehicleCosts, type: 'expense' },
-            { category: "Operational Expenses", amount: opertaionExpenses, type: 'expense' }
-          ]
-        });
-      }
+      setCalculatedData({
+        period: activeTab === 'monthly'
+          ? `Current: ${now.toLocaleString('default', { month: 'long', year: 'numeric' })}`
+          : `Current Year: ${currentYear}`,
+        revenue,
+        expenses: totalExpenses,
+        breakdown: [
+          { category: 'Logistics Revenue', amount: revenue, type: 'income' },
+          { category: 'Transporter Payments', amount: vehicleCosts, type: 'expense' },
+          { category: 'Operational Expenses', amount: operationalExpenses, type: 'expense' },
+        ],
+      });
     } catch (error) {
       console.error('Data Fetch Error:', error);
       addNotification('error', 'Failed to calculate live report data.');
@@ -130,24 +112,15 @@ const Reports: React.FC<ReportsProps> = ({ onBack }) => {
   const handleSaveReport = async () => {
     try {
       setSaving(true);
-      const response = await fetch('/api/reports', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          period: calculatedData.period,
-          revenue: calculatedData.revenue,
-          expenses: calculatedData.expenses,
-          net: calculatedData.revenue - calculatedData.expenses,
-          type: activeTab,
-          details: calculatedData.breakdown
-        })
+      await reportApi.create({
+        period: calculatedData.period,
+        revenue: calculatedData.revenue,
+        expenses: calculatedData.expenses,
+        net: calculatedData.revenue - calculatedData.expenses,
+        type: activeTab,
+        details: calculatedData.breakdown,
       });
-
-      if (response.ok) {
-        addNotification('success', 'Report archived successfully.');
-      } else {
-        throw new Error('Failed to save');
-      }
+      addNotification('success', 'Report archived successfully.');
     } catch (error) {
       console.error('Save error:', error);
       addNotification('error', 'Failed to save report record.');
